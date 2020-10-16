@@ -1,0 +1,158 @@
+1)
+
+use customer;
+
+CREATE TABLE  customer_master(
+customer_number integer,
+firstname varchar(20), lastname varchar(20),
+PRIMARY KEY (customer_number)
+);
+
+CREATE TABLE account_master(
+account_number integer,
+account_opening_date date,
+customer_number integer,
+PRIMARY KEY(account_number,customer_number),
+FOREIGN KEY (customer_number) REFERENCES customer_master(customer_number)
+);
+
+insert into customer_master values (122342,'mani','kanta');
+insert into customer_master values (124187,'sai','kumar');
+insert into customer_master values (123456,'srujana','kurasakutla');
+insert into customer_master values (223345, 'Ravi' , 'Kumar');
+insert into customer_master values (223379, 'Pavan' , 'Kumar');
+
+
+INSERT INTO account_master VALUES (146988, '2017-08-16',122342);
+INSERT INTO account_master VALUES (248591, '2018-12-05',123456);
+INSERT INTO account_master VALUES (259874, '2019-04-12',124187);
+
+select * from account_master;
+		account_number	account_opening_date	customer_number
+		146988		2017-08-16		122342
+		248591		2018-12-05		123456
+		259874		2019-04-12		124187
+		289578		2017-08-16		122342
+		298124		2018-12-05		123456
+			
+select * from customer_master;
+		customer_number	firstname	lastname
+		122342		mani		kanta
+		123456		srujana		kurasakutla
+		124187		sai		kumar
+		223345		Ravi		Kumar
+		223379		Pavan		Kumar
+			
+			
+
+SELECT am.account_number, cm.customer_number, cm.firstname, cm.lastname, am.account_opening_date
+FROM customer_master cm INNER JOIN account_master am on cm.customer_number = am.customer_number order by am.account_number;
+
+		account_number	customer_number	firstname	lastname	account_opening_date
+		146988		122342		mani		kanta		2017-08-16
+		248591		123456		srujana		kurasakutla	2018-12-05
+		259874		124187		sai		kumar		2019-04-12
+		289578		122342		mani		kanta		2017-08-16
+		298124		123456		srujana		kurasakutla	2018-12-05
+
+
+3)
+
+SELECT  am.customer_number, firstname, account_number
+FROM customer_master cm INNER JOIN account_master am
+ON cm.customer_number=am.customer_number
+WHERE day(account_opening_date)>15
+ORDER BY am.customer_number, account_number; 
+	
+		customer_number	firstname	account_number
+		122342		mani		146988
+		122342		mani		289578
+5)
+
+
+select firstname FROM customer_master cm INNER JOIN account_master am ON cm.customer_number=am.customer_number 
+group by firstname having count(account_number)>1 order by firstname;
+
+	firstname
+	mani
+	srujana
+
+6)
+
+CREATE TABLE loan_details (
+loan_account_number integer,
+loan_taken_date date,
+customer_number integer,
+PRIMARY KEY (loan_account_number),
+FOREIGN KEY (customer_number) REFERENCES customer_master(customer_number)
+);
+
+insert into loan_details values (258963,'2019-05-13',223345);
+insert into loan_details values (358454,'2018-10-25',223379);
+
+select * from loan_details;
+
+	loan_account_number	loan_taken_date	customer_number
+	258963			2019-05-13	223345
+	358454			2018-10-25	223379
+			
+
+SELECT count(ld.customer_number) as Count
+FROM customer_master cm INNER JOIN loan_details ld
+ON  cm.customer_number=ld.customer_number
+WHERE cm.customer_number NOT IN ( SELECT customer_number FROM account_master); 
+
+	Count
+	2
+
+7)
+
+
+SELECT firstname FROM customer_master INNER JOIN account_master
+ON customer_master.customer_number = account_master.customer_number GROUP BY firstname
+having count(firstname)>=2 order by firstname; 
+
+
+	firstname
+	mani
+	srujana
+
+
+2.
+CREATE TABLE `customer_master` (
+  `customer_number` int NOT NULL,
+  `firstname` varchar(45) NOT NULL,
+  `lastname` varchar(45) NOT NULL,
+  `customer_email` varchar(45) NOT NULL,
+  `customer_city` varchar(45) NOT NULL,
+  `account_number` int NOT NULL,
+  PRIMARY KEY (`customer_number`),
+  UNIQUE KEY `customer_email_UNIQUE` (`customer_email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+INSERT INTO `customer_master` VALUES (121457,'vijju','kurasakutla','vijjuk@gmail.com','banglore',365598),(122342,'mani','kanta','manikantakk@gmail.com','chennai',356985),(123456,'srujana','kurasakutla','srujanak@gmail.com','chennai',369687),(124187,'sai','kumar','saikumar123@gmail.com','chennai',386954),(124567,'mrudula','sana','mrudulas@gmailcom','chennai',358745);
+
+mysql> SELECT count(customer_number) cust_count from customer_master WHERE customer_city='chennai';
++------------+
+| cust_count |
++------------+
+|          4 |
++------------+
+1 row in set (0.04 sec)
+
+4.
+CREATE TABLE `account_master` (
+  `customer_number` int NOT NULL,
+  `account_number` int NOT NULL,
+  `amount` int NOT NULL,
+  PRIMARY KEY (`customer_number`)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+INSERT INTO `account_master` VALUES (121457,365598,500000),(123456,369687,400000);
+
+mysql> SELECT count(customer_number) Count_Customer FROM customer_master WHERE customer_number NOT IN (SELECT customer_number FROM account_master);
++----------------+
+| Count_Customer |
++----------------+
+|              3 |
++----------------+
+
